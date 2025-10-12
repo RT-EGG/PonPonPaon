@@ -12,28 +12,28 @@ export const useVideoProfile = () => {
     };
 
     const loadProfile = async (filePath: string) => {
-        filePath = filePath.replace("/", "\\");
-        const loadFile: (path: string) => VideoProfile = async (
-            path: string
-        ) => {
-            const fileName = await getProfileFileName(filePath);
-            const directory = await window.files.getUserDataPath();
-            const profileFilePath = `${directory}\\profiles\\${fileName}`;
-            console.log(profileFilePath);
-            if (!(await window.files.exists(profileFilePath))) {
-                return {
-                    lastAccessDate: Date.now(),
-                    filePath: path,
-                };
-            }
+        // filePath = filePath.replace("/", "\\");
+        // const loadFile: (path: string) => VideoProfile = async (
+        //     path: string
+        // ) => {
+        //     const fileName = await getProfileFileName(filePath);
+        //     const directory = await window.files.getUserDataPath();
+        //     const profileFilePath = `${directory}\\profiles\\${fileName}`;
+        //     console.log(profileFilePath);
+        //     if (!(await window.files.exists(profileFilePath))) {
+        //         return {
+        //             lastAccessDate: Date.now(),
+        //             filePath: path,
+        //         };
+        //     }
 
-            const file = (await window.files.readFile(
-                profileFilePath
-            )) as string;
-            return JSON.parse(file) as VideoProfile;
-        };
+        //     const file = (await window.files.readFile(
+        //         profileFilePath
+        //     )) as string;
+        //     return JSON.parse(file) as VideoProfile;
+        // };
 
-        let profile = loadFile(filePath);
+        // let profile = loadFile(filePath);
     };
 
     return {

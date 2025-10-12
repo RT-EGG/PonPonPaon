@@ -4,7 +4,7 @@ import VideoController from "./components/VideoController";
 import { VideoPlayerHandle } from "@/types/videoPlayer";
 import { useAppSelector } from "@/hooks";
 import useVideoThumbnail, { Thumbnail } from "@/hooks/useVideoThumbnail";
-import { loadProfile } from "@/hooks/useVideoProfile";
+//import { loadProfile } from "@/hooks/useVideoProfile";
 
 export default () => {
     const [handle, setHandle] = React.useState<VideoPlayerHandle | null>(null);
@@ -25,7 +25,7 @@ export default () => {
         if (!!filePath && fileMeta) {
             (async () => {
                 await thumbActions.load(filePath, fileMeta.duration);
-                await loadProfile(filePath);
+                //await loadProfile(filePath);
             })();
         }
     }, [filePath, fileMeta]);
