@@ -1,0 +1,6 @@
+{
+    "extends": ["eslint:recommended"],
+    "import/resolver": {
+        "typescript": { "project": "./" }
+    }
+}

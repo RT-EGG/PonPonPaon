@@ -1,0 +1,6 @@
+デバッグ実行
+npm run dev
+// node build-win
+exe化
+npx electron-forge import
+npm run make
