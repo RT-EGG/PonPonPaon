@@ -6,8 +6,6 @@ interface Props {
     knobStyle?: React.CSSProperties;
     duration: number; // in seconds
     currentTime: number; // in seconds
-    volume: number; // 0.0 - 1.0
-    muted: boolean;
     onStartSeek: () => void;
     onSeek: (time: number) => void;
     onCommitSeek: (time: number) => void;

@@ -1,25 +1,34 @@
 import React from "react";
-import { useAppDispatch, useAppSelector } from "@/hooks";
 import { PlayStateType, VideoPlayerHandle } from "@/types/videoPlayer";
-import {
-    setVideoMeta,
-    updateVideoDuration,
-    setPlayState,
-} from "@/slices/playerSlice";
 import useVideoGain from "@/hooks/useVideoGain";
 
 export interface Props {
     ref?: React.Ref<VideoPlayerHandle>;
-    onStep: (seconds: number) => void;
-    onChangeVolume: (volume: number) => void;
-    onChangeMuted: (muted: boolean) => void;
+    filePath?: string; // 外部から渡されるfilePath
+    onStep?: (seconds: number) => void;
+    onChangeVolume?: (volume: number) => void;
+    onChangeGain?: (gain: number) => void;
+    onChangeMuted?: (muted: boolean) => void;
+    onPlayStateChange?: (state: PlayStateType) => void;
+    onMetadataLoaded?: (meta: { duration: number; width: number; height: number }) => void;
+    onChangeDuration?: (duration: number) => void;
 }
 
 function VideoPlayer(props: Props) {
-    const { ref, onStep, onChangeVolume, onChangeMuted } = props;
+    const { 
+        ref, 
+        filePath,
+        onStep, 
+        onChangeVolume, 
+        onChangeGain,
+        onChangeMuted,
+        onPlayStateChange,
+        onMetadataLoaded,
+        onChangeDuration,
+    } = props;
 
-    const dispatch = useAppDispatch();
-    const filePath = useAppSelector((state) => state.player.filePath);
+    // ローカル状態
+    const [loading, setLoading] = React.useState(false);
 
     const videoRef = React.useRef<HTMLVideoElement | null>(null);
     const gainController = useVideoGain(videoRef);
@@ -28,7 +37,7 @@ function VideoPlayer(props: Props) {
         if (!!filePath) {
             gainController.resume();
         }
-    }, [filePath]);
+    }, [filePath, gainController]);
 
     React.useImperativeHandle(
         ref,
@@ -44,16 +53,23 @@ function VideoPlayer(props: Props) {
                 if (videoRef.current) {
                     videoRef.current.currentTime = seconds;
                 }
-                onStep(seconds);
+                onStep?.(seconds);
             },
             setVolume: (volume: number) => {
-                gainController.setLinear(volume);
-            },
-            setMuted: (muted: boolean) => {
                 if (videoRef.current) {
-                    videoRef.current.muted = muted;
+                    videoRef.current.volume = volume;
                 }
-                onChangeMuted(muted);
+                // gainController.setLinear(volume);
+            },
+            setGain: (gain: number) => {
+                gainController.setLinear(gain);
+                onChangeGain?.(gain);
+            },
+            setMuted: (isMuted: boolean) => {
+                if (videoRef.current) {
+                    videoRef.current.muted = isMuted;
+                }
+                onChangeMuted?.(isMuted);
             },
             getGain: () => gainController.getGain(),
         }),
@@ -73,32 +89,37 @@ function VideoPlayer(props: Props) {
             {
                 target: "loadedmetadata",
                 handler: () => {
-                    dispatch(
-                        setVideoMeta({
-                            duration: video.duration,
-                            width: video.videoWidth,
-                            height: video.videoHeight,
-                        })
-                    );
+                    const metadata = {
+                        duration: video.duration,
+                        width: video.videoWidth,
+                        height: video.videoHeight,
+                    };
+                    onChangeDuration?.(video.duration);
+                    onMetadataLoaded?.(metadata);
+                    setLoading(false);
                 },
             },
             {
                 target: "durationchange",
                 handler: () => {
-                    dispatch(updateVideoDuration(video.duration));
+                    onChangeDuration?.(video.duration);
                 },
             },
             {
+                target: "timeupdate",
+                handler: () => onStep?.(video.currentTime),
+            },
+            {
                 target: "play",
-                handler: () => dispatch(setPlayState(PlayStateType.Playing)),
+                handler: () => onPlayStateChange?.(PlayStateType.Playing),
             },
             {
                 target: "pause",
-                handler: () => dispatch(setPlayState(PlayStateType.Paused)),
+                handler: () => onPlayStateChange?.(PlayStateType.Paused),
             },
             {
                 target: "ended",
-                handler: () => dispatch(setPlayState(PlayStateType.Stopped)),
+                handler: () => onPlayStateChange?.(PlayStateType.Stopped),
             },
             {
                 target: "volumechange",
@@ -113,13 +134,6 @@ function VideoPlayer(props: Props) {
         events.forEach((event) => {
             video.addEventListener(event.target, event.handler);
         });
-
-        const step = () => {
-            onStep(video.currentTime);
-            video.requestVideoFrameCallback(step);
-        };
-        onStep(0);
-        video.requestVideoFrameCallback(step);
 
         return () => {
             events.forEach((event) => {

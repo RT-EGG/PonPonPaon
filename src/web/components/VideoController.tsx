@@ -2,7 +2,7 @@ import * as React from "react";
 import { FaPlay, FaPause } from "react-icons/fa";
 import { Button } from "@/shared/ui";
 import { PlayStateType, VideoPlayerHandle } from "@/types/videoPlayer";
-import { useAppSelector } from "@/hooks";
+import { useSharedStateContext } from "../../contexts/SharedStateContext";
 import SeekBar from "./SeekBar";
 import VolumeController from "./VolumeController";
 import { Thumbnail } from "@/hooks/useVideoThumbnail";
@@ -13,6 +13,7 @@ export interface ControllerProps {
     playerHandle: VideoPlayerHandle | null;
     currentTime: number;
     volume: number;
+    gain: number;
     muted: boolean;
     onPointerOverSeek?: (clientX: number, seconds: number) => void;
     onPointerLeaveSeek?: () => void;
@@ -36,6 +37,7 @@ export const VideoController = (props: ControllerProps) => {
         playerHandle,
         currentTime,
         volume,
+        gain,
         muted,
         onPointerOverSeek,
         onPointerLeaveSeek,
@@ -44,10 +46,14 @@ export const VideoController = (props: ControllerProps) => {
         return <React.Fragment />;
     }
 
-    const { resume, pause, seek, setVolume, setMuted } = playerHandle;
-    const { filePath, fileMeta, playState } = useAppSelector(
-        (state) => state.player
-    );
+    const { resume, pause, seek, setGain, setMuted } = playerHandle;
+    
+    // 共有stateから状態を取得
+    const { sharedState } = useSharedStateContext();
+    const filePath = sharedState.player.filePath;
+    const fileMeta = sharedState.player.fileMeta;
+    const playState = sharedState.player.playState;
+    
     const [isPlayingSeeking, setIsPlayingSeeking] =
         React.useState<boolean>(false);
     const seekBarRef = React.useRef<HTMLDivElement | null>(null);
@@ -75,11 +81,20 @@ export const VideoController = (props: ControllerProps) => {
                 }}
             >
                 {showPlayButton ? (
-                    <Button onClick={() => resume()} disabled={!filePath}>
+                    <Button 
+                        onClick={() => {
+                            resume();
+                        }} 
+                        disabled={!filePath}
+                    >
                         <FaPlay />
                     </Button>
                 ) : (
-                    <Button onClick={() => pause()}>
+                    <Button 
+                        onClick={() => {
+                            pause();
+                        }}
+                    >
                         <FaPause />
                     </Button>
                 )}
@@ -124,8 +139,6 @@ export const VideoController = (props: ControllerProps) => {
                             onPointerOverSeek?.(x, time);
                         }
                     }}
-                    volume={volume}
-                    muted={muted}
                 />
             </div>
             <VolumeController
@@ -134,9 +147,10 @@ export const VideoController = (props: ControllerProps) => {
                     marginRight: "8px",
                 }}
                 maxValue={2.0}
-                value={volume}
+                value={gain}
                 muted={muted}
-                setVolume={(value) => setVolume?.(value)}
+                // 現状、音量とゲインの設定は分かれていないので、ゲインでまとめる
+                setVolume={(value) => setGain?.(value)}
                 setMuted={(value) => setMuted?.(value)}
             />
             <div

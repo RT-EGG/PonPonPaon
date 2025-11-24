@@ -29,3 +29,26 @@ contextBridge.exposeInMainWorld("thumbs", {
     build: (inputPath: string, outputPath: string, params: ThumbParams) =>
         ipcRenderer.invoke("thumbs:build", inputPath, outputPath, params),
 });
+
+contextBridge.exposeInMainWorld("sharedState", {
+    getState: () => ipcRenderer.invoke("sharedState:getState"),
+    dispatch: (action: any) => ipcRenderer.invoke("sharedState:dispatch", action),
+    subscribe: (listener: (state: any) => void) => {
+        const handleStateSync = (_event: any, state: any) => listener(state);
+        ipcRenderer.on("state-sync", handleStateSync);
+        
+        // cleanup関数を返す
+        return () => {
+            ipcRenderer.off("state-sync", handleStateSync);
+        };
+    },
+});
+
+contextBridge.exposeInMainWorld("windowManager", {
+    createSubWindow: () => ipcRenderer.invoke("window:createSubWindow"),
+    showContextMenu: () => ipcRenderer.invoke("window:showContextMenu"),
+});
+
+contextBridge.exposeInMainWorld("dialog", {
+    openFile: () => ipcRenderer.invoke("dialog:openFile"),
+});
