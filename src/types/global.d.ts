@@ -1,6 +1,7 @@
 import { ISizeCalculationResult } from "image-size/types/interface";
 import { ThumbParams } from "@/lib/ffmpegThumbs";
 import { FileMeta } from "@/lib/files";
+import { RootState } from "@/store";
 
 export {};
 declare global {
@@ -25,6 +26,17 @@ declare global {
                 outputPath: string,
                 params: ThumbParams
             ): Promise<boolean>;
+        };
+        sharedState: {
+            getState(): Promise<RootState>;
+            dispatch(action: any): Promise<boolean>;
+            subscribe(listener: (state: RootState) => void): () => void;
+        };
+        windowManager: {
+            createSubWindow(): Promise<number>;
+        };
+        dialog: {
+            openFile(): Promise<string | null>;
         };
     }
 }

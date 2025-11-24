@@ -7,6 +7,9 @@ import imageSize from "image-size";
 import { pathToFileURL } from "node:url";
 import { LoadFileMeta } from "./lib/files";
 import registerIpcHandle from "./registerIpcHandle";
+import { sharedStateManager } from "./lib/sharedStateManager";
+import { createApplicationMenu } from "./lib/applicationMenu";
+import { Menu } from "electron";
 
 let mainWindow: BrowserWindow | null = null;
 let pending: string[] = [];
@@ -65,8 +68,20 @@ if (!gotLock) {
             },
         });
 
+        // ウィンドウをSharedStateManagerに登録
+        sharedStateManager.registerWindow(mainWindow);
+
+        // アプリケーションメニューを設定
+        const menu = createApplicationMenu(mainWindow);
+        Menu.setApplicationMenu(menu);
+
         // レンダラープロセスをロード
         mainWindow.loadFile("dist/index.html");
+        
+        // 開発環境では開発者ツールを開く
+        if (process.env.NODE_ENV === "development") {
+            mainWindow.webContents.openDevTools();
+        }
 
         // レンダラーのロード完了で未送信分を吐き出す
         mainWindow.webContents.on("did-finish-load", () => {

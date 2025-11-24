@@ -1,13 +1,14 @@
 import { configureStore } from "@reduxjs/toolkit";
-import player from "@/slices/playerSlice";
-import videoController from "@/slices/videoControllerSlice";
+import player, { initialState as playerInitialState } from "@/slices/playerSlice";
 
 export const store = configureStore({
     reducer: {
         player,
-        videoController,
     },
 });
 
 export type RootState = ReturnType<typeof store.getState>;
-export type AppDispatch = typeof store.dispatch;
+
+export const initialRootState: RootState = {
+    player: playerInitialState,
+};

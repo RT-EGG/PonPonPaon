@@ -6,8 +6,8 @@
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "dev": "rimraf dist && run-p dev:webpack dev:electron",
-        "dev:webpack": "cross-env NODE_ENV=\"development\" webpack --progress",
-        "dev:electron": "wait-on ./dist/index.html ./dist/main.js && electronmon .",
+        "dev:webpack": "cross-env NODE_ENV=\"development\" webpack --progress --watch",
+        "dev:electron": "wait-on dist/index.html && electronmon .",
         "build": "cross-env NODE_ENV=\"production\" webpack --progress",
         "format": "prettier --write 'src/**/*.{js,ts,json}'",
         "lint": "npm-run-all eslint check-types",
@@ -75,6 +75,7 @@
         "react-dom": "^19.1.1",
         "react-icons": "^5.5.0",
         "styled-components": "^6.1.19",
-        "tailwindcss": "^4.1.13"
+        "tailwindcss": "^4.1.13",
+        "webpack-dev-server": "^5.2.2"
     }
 }

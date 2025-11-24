@@ -16,7 +16,7 @@ const common: Configuration = {
     resolve: {
         extensions: [".js", ".ts", ".jsx", ".tsx", ".json"],
         alias: {
-            "@/*": path.resolve("./src/*"),
+            "@": path.resolve(__dirname, "src"),
         },
     },
     /**
@@ -59,8 +59,6 @@ const common: Configuration = {
             },
         ],
     },
-    // 開発時には watch モードでファイルの変化を監視する
-    watch: isDev,
     /**
      * development モードではソースマップを付ける
      *

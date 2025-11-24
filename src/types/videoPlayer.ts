@@ -1,11 +1,3 @@
-export interface VideoPlayerHandle {
-    resume: () => void;
-    pause: () => void;
-    seek: (seconds: number) => void;
-    setVolume?: (volume: number) => void; // 0.0 - 1.0
-    setMuted?: (muted: boolean) => void;
-    getGain: () => number;
-}
 
 export const PlayStateType = {
     Playing: "playing",
@@ -18,4 +10,14 @@ export interface VideoFileMeta {
     duration: number; // in seconds
     width: number; // in pixels
     height: number; // in pixels
+}
+
+export interface VideoPlayerHandle {
+    resume: () => void;
+    pause: () => void;
+    seek: (seconds: number) => void;
+    setVolume?: (volume: number) => void; // 0.0 - 1.0
+    setGain?: (gain: number) => void;
+    setMuted?: (muted: boolean) => void;
+    getGain: () => number;
 }
